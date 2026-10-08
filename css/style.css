@@ -433,3 +433,15 @@ body {
   letter-spacing: 0.3em;
   text-transform: uppercase;
 }
+
+.rodape p {
+  margin: 0;
+}
+
+.rodape .creditos {
+  margin-top: 6px;
+  font-size: 0.75rem;
+  letter-spacing: normal;
+  text-transform: none;
+  opacity: 0.8;
+}
