@@ -156,12 +156,6 @@ body {
   outline-offset: 2px;
 }
 
-.aviso {
-  margin: 12px 0 0;
-  font-size: 0.88rem;
-  color: var(--roxo-claro);
-}
-
 /* Itens */
 
 .lista-itens {
