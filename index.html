@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Venda — Balaclav</title>
+<link rel="icon" type="image/png" href="img/logo.png">
+<link rel="stylesheet" href="css/style.css?v=1">
+</head>
+<body>
+
+<header class="topo">
+  <div class="topo-conteudo">
+    <img class="brasao" src="img/logo.png" alt="Logo Balaclav" width="72" height="72">
+    <div>
+      <h1>Balaclav</h1>
+      <p class="subtitulo">Calculadora de Venda</p>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <div class="coluna-principal">
+    <section class="cartao tipo-venda">
+      <h2>Tipo de venda</h2>
+      <div class="seletor-parceria" role="radiogroup" aria-label="Tipo de venda">
+        <label>
+          <input type="radio" name="parceria" value="com">
+          <span>Com parceria</span>
+        </label>
+        <label>
+          <input type="radio" name="parceria" value="sem" checked>
+          <span>Sem parceria</span>
+        </label>
+      </div>
+      <p class="aviso">⚠️ Não há parcerias de reanimação.</p>
+    </section>
+
+    <section id="lista-itens" class="cartao lista-itens" aria-live="polite">
+      <p class="carregando">Carregando itens...</p>
+    </section>
+  </div>
+
+  <div class="coluna-lateral">
+  <aside class="cartao resumo">
+    <h2>Resumo do Pedido</h2>
+    <p id="resumo-tipo" class="resumo-tipo">Sem parceria</p>
+    <ul id="resumo-lista" class="resumo-lista">
+      <li class="resumo-vazio">Nenhum item selecionado</li>
+    </ul>
+    <div class="resumo-total">
+      <span>Total</span>
+      <strong id="total-valor">R$ 0</strong>
+    </div>
+    <button id="copiar" type="button" class="botao-copiar">📋 Copiar valor total</button>
+    <button id="limpar" type="button" class="botao-limpar">Limpar tudo</button>
+  </aside>
+
+  <section class="cartao link-imagem">
+    <h2>Imagem para enviar</h2>
+    <a href="img/tabela.png" target="_blank" rel="noopener">
+      <img class="link-preview" src="img/tabela.png" alt="Tabela de preços Balaclav">
+    </a>
+    <input id="link-campo" class="link-campo" type="text" readonly value="https://lorddarkspy.github.io/Balaclav-Calc/img/tabela.png" aria-label="Link da imagem">
+    <button id="copiar-link" type="button" class="botao-copiar">📋 Copiar link da imagem</button>
+  </section>
+  </div>
+
+</main>
+
+<footer class="rodape">
+  <p>Balaclav</p>
+</footer>
+
+<script src="js/script.js?v=1"></script>
+</body>
+</html>

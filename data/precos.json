@@ -1,0 +1,33 @@
+{
+  "moeda": "R$ ",
+  "itens": [
+    {
+      "id": "epinefrina",
+      "nome": "Epinefrina",
+      "icone": "💉",
+      "precoComParceria": 1800,
+      "precoSemParceria": 2400
+    },
+    {
+      "id": "morfina",
+      "nome": "Morfina",
+      "icone": "💊",
+      "precoComParceria": 2000,
+      "precoSemParceria": 2600
+    },
+    {
+      "id": "algema",
+      "nome": "Algema",
+      "icone": "🔗",
+      "precoComParceria": 3600,
+      "precoSemParceria": 4200
+    },
+    {
+      "id": "capuz",
+      "nome": "Capuz",
+      "icone": "🥷",
+      "precoComParceria": 3600,
+      "precoSemParceria": 4200
+    }
+  ]
+}
