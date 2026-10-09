@@ -5,8 +5,23 @@ const totalValorEl = document.getElementById('total-valor');
 const limparBtn = document.getElementById('limpar');
 const copiarBtn = document.getElementById('copiar');
 const radiosParceria = document.querySelectorAll('input[name="parceria"]');
+const registrarBtn = document.getElementById('registrar');
+const registroStatusEl = document.getElementById('registro-status');
+const campoParceriaEl = document.getElementById('campo-parceria');
+const nomeParceriaInput = document.getElementById('nome-parceria');
+const vendedorNomeEl = document.getElementById('vendedor-nome');
+const trocarVendedorBtn = document.getElementById('trocar-vendedor');
+const modalVendedorEl = document.getElementById('modal-vendedor');
+const formVendedor = document.getElementById('form-vendedor');
+const inputVendedor = document.getElementById('input-vendedor');
+const modalErroEl = document.getElementById('modal-erro');
+
+// A URL do webhook vem de js/config.js (fora do Git). Veja js/config.exemplo.js.
+const WEBHOOK_URL = (window.BALACLAV_CONFIG && window.BALACLAV_CONFIG.webhookUrl) || '';
+const CHAVE_VENDEDOR = 'balaclav-vendedor';
 
 let moeda = 'R$ ';
+let vendedor = '';
 let totalAtual = 0;
 let comParceria = false;
 const quantidades = {};
@@ -77,6 +92,105 @@ function copiarParaAreaDeTransferencia(texto) {
   return copiarComExecCommand(texto) ? Promise.resolve() : Promise.reject(new Error('Falha ao copiar'));
 }
 
+function lerVendedorSalvo() {
+  try {
+    return (localStorage.getItem(CHAVE_VENDEDOR) || '').trim();
+  } catch (e) {
+    return '';
+  }
+}
+
+function salvarVendedor(nome) {
+  try {
+    localStorage.setItem(CHAVE_VENDEDOR, nome);
+  } catch (e) {
+    // Sem localStorage (ex.: aba anônima bloqueada): vale só nesta sessão.
+  }
+}
+
+function definirVendedor(nome) {
+  vendedor = nome;
+  vendedorNomeEl.textContent = nome;
+}
+
+function abrirModalVendedor() {
+  inputVendedor.value = vendedor;
+  modalErroEl.hidden = true;
+  modalVendedorEl.hidden = false;
+  document.body.classList.add('modal-aberto');
+  inputVendedor.focus();
+}
+
+function fecharModalVendedor() {
+  modalVendedorEl.hidden = true;
+  document.body.classList.remove('modal-aberto');
+}
+
+formVendedor.addEventListener('submit', (evento) => {
+  evento.preventDefault();
+  const nome = inputVendedor.value.trim();
+  if (nome.length < 2) {
+    modalErroEl.hidden = false;
+    inputVendedor.focus();
+    return;
+  }
+  salvarVendedor(nome);
+  definirVendedor(nome);
+  fecharModalVendedor();
+});
+
+trocarVendedorBtn.addEventListener('click', abrirModalVendedor);
+
+const vendedorSalvo = lerVendedorSalvo();
+if (vendedorSalvo) {
+  definirVendedor(vendedorSalvo);
+} else {
+  abrirModalVendedor();
+}
+
+function atualizarCampoParceria() {
+  campoParceriaEl.hidden = !comParceria;
+  nomeParceriaInput.classList.remove('invalido');
+}
+
+function mostrarStatusRegistro(texto, tipo) {
+  registroStatusEl.textContent = texto;
+  registroStatusEl.className = `registro-status ${tipo}`;
+  registroStatusEl.hidden = false;
+}
+
+function montarRegistro(itens) {
+  const selecionados = itens.filter((item) => (quantidades[item.id] || 0) > 0);
+  const linhasItens = selecionados.map((item) => {
+    const qtd = quantidades[item.id];
+    return `${item.icone} **${item.nome}** x${qtd} — ${formatarValor(precoAtual(item) * qtd)}`;
+  });
+
+  const campos = [
+    { name: 'Vendedor', value: vendedor, inline: true },
+    { name: 'Tipo de venda', value: comParceria ? 'Com parceria' : 'Sem parceria', inline: true },
+  ];
+  if (comParceria) {
+    campos.push({ name: 'Parceria', value: nomeParceriaInput.value.trim(), inline: true });
+  }
+  campos.push(
+    { name: 'Itens', value: linhasItens.join('\n') },
+    { name: 'Total', value: `**${formatarValor(totalAtual)}**` },
+  );
+
+  return {
+    username: 'Balaclav — Registro de Vendas',
+    allowed_mentions: { parse: [] },
+    embeds: [{
+      title: '📝 Registro de Venda',
+      color: 0x9d3cff,
+      fields: campos,
+      footer: { text: 'Calculadora de Venda Balaclav' },
+      timestamp: new Date().toISOString(),
+    }],
+  };
+}
+
 function atualizarLinha(item) {
   const qtd = quantidades[item.id] || 0;
   const linha = document.getElementById(`linha-${item.id}`);
@@ -140,6 +254,7 @@ function renderizarItens(itens) {
   radiosParceria.forEach((radio) => {
     radio.addEventListener('change', () => {
       comParceria = radio.value === 'com' && radio.checked;
+      atualizarCampoParceria();
       itens.forEach(atualizarLinha);
       atualizarResumo(itens);
     });
@@ -165,7 +280,53 @@ function renderizarItens(itens) {
     });
   });
 
+  nomeParceriaInput.addEventListener('input', () => nomeParceriaInput.classList.remove('invalido'));
+
+  registrarBtn.addEventListener('click', () => {
+    if (!vendedor) {
+      abrirModalVendedor();
+      return;
+    }
+    if (totalAtual <= 0) {
+      mostrarStatusRegistro('Adicione pelo menos um item antes de registrar.', 'erro');
+      return;
+    }
+    if (comParceria && !nomeParceriaInput.value.trim()) {
+      nomeParceriaInput.classList.add('invalido');
+      nomeParceriaInput.focus();
+      mostrarStatusRegistro('Informe o nome da parceria.', 'erro');
+      return;
+    }
+
+    if (!WEBHOOK_URL) {
+      mostrarStatusRegistro('Webhook não configurado (js/config.js).', 'erro');
+      return;
+    }
+
+    registrarBtn.disabled = true;
+    registrarBtn.textContent = '⏳ Registrando...';
+    registroStatusEl.hidden = true;
+
+    fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(montarRegistro(itens)),
+    })
+      .then((resposta) => {
+        if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+        mostrarStatusRegistro('✅ Venda registrada no Discord!', 'sucesso');
+      })
+      .catch((erro) => {
+        mostrarStatusRegistro(`Não foi possível registrar a venda (${erro.message}). Tente novamente.`, 'erro');
+      })
+      .finally(() => {
+        registrarBtn.disabled = false;
+        registrarBtn.textContent = '📝 Registrar venda';
+      });
+  });
+
   comParceria = document.querySelector('input[name="parceria"]:checked').value === 'com';
+  atualizarCampoParceria();
   itens.forEach(atualizarLinha);
   atualizarResumo(itens);
 }

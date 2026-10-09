@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Venda — Balaclav</title>
 <link rel="icon" type="image/png" href="img/logo.png">
-<link rel="stylesheet" href="css/style.css?v=4">
+<link rel="stylesheet" href="css/style.css?v=5">
 </head>
 <body>
 
@@ -30,6 +30,10 @@
           <span>Sem parceria</span>
         </label>
       </div>
+      <div id="campo-parceria" class="campo-parceria" hidden>
+        <label for="nome-parceria">Nome da parceria <span class="obrigatorio">*</span></label>
+        <input id="nome-parceria" type="text" maxlength="60" autocomplete="off" placeholder="Ex.: nome da organização parceira">
+      </div>
     </section>
 
     <section id="lista-itens" class="cartao lista-itens" aria-live="polite">
@@ -40,6 +44,10 @@
   <div class="coluna-lateral">
   <aside class="cartao resumo">
     <h2>Resumo do Pedido</h2>
+    <div class="vendedor-atual">
+      <span>👤 <strong id="vendedor-nome">—</strong></span>
+      <button id="trocar-vendedor" type="button" class="botao-link">Trocar</button>
+    </div>
     <p id="resumo-tipo" class="resumo-tipo">Sem parceria</p>
     <ul id="resumo-lista" class="resumo-lista">
       <li class="resumo-vazio">Nenhum item selecionado</li>
@@ -49,6 +57,8 @@
       <strong id="total-valor">R$ 0</strong>
     </div>
     <button id="copiar" type="button" class="botao-copiar">📋 Copiar valor total</button>
+    <button id="registrar" type="button" class="botao-registrar">📝 Registrar venda</button>
+    <p id="registro-status" class="registro-status" role="status" hidden></p>
     <button id="limpar" type="button" class="botao-limpar">Limpar tudo</button>
   </aside>
 
@@ -69,6 +79,18 @@
   <p class="creditos">Desenvolvido por Omar Telo · © 2026 Todos os direitos reservados</p>
 </footer>
 
-<script src="js/script.js?v=1"></script>
+<div id="modal-vendedor" class="modal-fundo" hidden>
+  <form id="form-vendedor" class="modal cartao" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <img class="modal-logo" src="img/logo.png" alt="" width="64" height="64">
+    <h2 id="modal-titulo">Identifique-se</h2>
+    <p class="modal-texto">Informe seu nome para registrar as vendas. Ele fica salvo neste navegador.</p>
+    <input id="input-vendedor" type="text" maxlength="40" autocomplete="name" placeholder="Seu nome" required>
+    <p id="modal-erro" class="modal-erro" hidden>Digite seu nome para continuar.</p>
+    <button type="submit" class="botao-registrar">Entrar</button>
+  </form>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/script.js?v=2"></script>
 </body>
 </html>
