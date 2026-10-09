@@ -16,7 +16,7 @@ const formVendedor = document.getElementById('form-vendedor');
 const inputVendedor = document.getElementById('input-vendedor');
 const modalErroEl = document.getElementById('modal-erro');
 
-// A URL do webhook vem de js/config.js (fora do Git). Veja js/config.exemplo.js.
+// A URL do webhook vem de js/config.js.
 const WEBHOOK_URL = (window.BALACLAV_CONFIG && window.BALACLAV_CONFIG.webhookUrl) || '';
 const CHAVE_VENDEDOR = 'balaclav-vendedor';
 const CHAVE_VENDEDOR_ID = 'balaclav-vendedor-id';
