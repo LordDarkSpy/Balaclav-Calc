@@ -182,7 +182,7 @@ const sucessoTextoEl = document.getElementById('sucesso-texto');
 
 const TEXTOS_SUCESSO = {
   venda: { titulo: 'Venda registrada!', texto: 'O registro foi enviado para o Discord.', rotulo: 'Valor total cobrado', botao: 'Nova venda' },
-  pedido: { titulo: 'Pedido registrado!', texto: 'O pedido foi enviado para o Discord. Os itens continuam na calculadora para a venda.', rotulo: 'Valor total do pedido', botao: 'OK' },
+  pedido: { titulo: 'Pedido registrado!', texto: 'O pedido foi enviado para o Discord.', rotulo: 'Valor total do pedido', botao: 'OK' },
 };
 const sucessoRotuloEl = document.getElementById('sucesso-rotulo');
 
@@ -443,7 +443,6 @@ function renderizarItens(itens) {
     return true;
   }
 
-  // tipo 'venda': registra e limpa tudo. tipo 'pedido': registra e mantém os itens para a venda depois.
   function registrar(tipo, botao, url, dadosPedido) {
     if (!podeRegistrar(url)) return;
 
@@ -459,12 +458,9 @@ function renderizarItens(itens) {
 
     enviarWebhook(url, montarRegistro(itens, tipo, dadosPedido))
       .then(() => {
-        if (tipo === 'venda') {
-          limparTudo();
-          nomeParceriaInput.value = '';
-        } else {
-          formPedido.reset();
-        }
+        limparTudo();
+        nomeParceriaInput.value = '';
+        formPedido.reset();
         abrirModalSucesso(tipo, totalRegistrado, detalhe);
       })
       .catch((erro) => {
