@@ -591,6 +591,27 @@ body.modal-aberto {
   overflow-wrap: anywhere;
 }
 
+.modal-rotulo {
+  display: block;
+  margin: 12px 0 6px;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.opcional {
+  color: var(--texto-suave);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.modal-dica {
+  margin: 6px 0 0;
+  text-align: left;
+  color: var(--texto-suave);
+  font-size: 0.75rem;
+}
+
 .modal-erro {
   margin: 8px 0 0;
   color: #ffb3c6;

@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Venda — Balaclav</title>
 <link rel="icon" type="image/png" href="img/logo.png">
-<link rel="stylesheet" href="css/style.css?v=6">
+<link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body>
 
@@ -83,8 +83,12 @@
   <form id="form-vendedor" class="modal cartao" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
     <img class="modal-logo" src="img/logo.png" alt="" width="64" height="64">
     <h2 id="modal-titulo">Identifique-se</h2>
-    <p class="modal-texto">Informe seu nome para registrar as vendas. Ele fica salvo neste navegador.</p>
+    <p class="modal-texto">Informe seus dados para registrar as vendas. Eles ficam salvos neste navegador.</p>
+    <label class="modal-rotulo" for="input-vendedor">Nome <span class="obrigatorio">*</span></label>
     <input id="input-vendedor" type="text" maxlength="40" autocomplete="name" placeholder="Seu nome" required>
+    <label class="modal-rotulo" for="input-vendedor-id">ID do Discord <span class="opcional">(opcional, para ser marcado)</span></label>
+    <input id="input-vendedor-id" type="text" inputmode="numeric" maxlength="20" autocomplete="off" placeholder="Ex.: 123456789012345678">
+    <p class="modal-dica">Discord → Configurações → Avançado → ative o Modo Desenvolvedor. Depois clique no seu perfil e em "Copiar ID do usuário".</p>
     <p id="modal-erro" class="modal-erro" hidden>Digite seu nome para continuar.</p>
     <button type="submit" class="botao-registrar">Entrar</button>
   </form>
@@ -104,6 +108,6 @@
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/script.js?v=3"></script>
+<script src="js/script.js?v=4"></script>
 </body>
 </html>

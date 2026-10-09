@@ -19,9 +19,12 @@ const modalErroEl = document.getElementById('modal-erro');
 // A URL do webhook vem de js/config.js (fora do Git). Veja js/config.exemplo.js.
 const WEBHOOK_URL = (window.BALACLAV_CONFIG && window.BALACLAV_CONFIG.webhookUrl) || '';
 const CHAVE_VENDEDOR = 'balaclav-vendedor';
+const CHAVE_VENDEDOR_ID = 'balaclav-vendedor-id';
+const inputVendedorId = document.getElementById('input-vendedor-id');
 
 let moeda = 'R$ ';
 let vendedor = '';
+let vendedorId = '';
 let totalAtual = 0;
 let comParceria = false;
 const quantidades = {};
@@ -92,29 +95,41 @@ function copiarParaAreaDeTransferencia(texto) {
   return copiarComExecCommand(texto) ? Promise.resolve() : Promise.reject(new Error('Falha ao copiar'));
 }
 
-function lerVendedorSalvo() {
+function lerSalvo(chave) {
   try {
-    return (localStorage.getItem(CHAVE_VENDEDOR) || '').trim();
+    return (localStorage.getItem(chave) || '').trim();
   } catch (e) {
     return '';
   }
 }
 
-function salvarVendedor(nome) {
+function salvar(chave, valor) {
   try {
-    localStorage.setItem(CHAVE_VENDEDOR, nome);
+    if (valor) {
+      localStorage.setItem(chave, valor);
+    } else {
+      localStorage.removeItem(chave);
+    }
   } catch (e) {
     // Sem localStorage (ex.: aba anônima bloqueada): vale só nesta sessão.
   }
 }
 
-function definirVendedor(nome) {
+function definirVendedor(nome, id) {
   vendedor = nome;
+  vendedorId = id;
   vendedorNomeEl.textContent = nome;
+}
+
+function mostrarErroModal(texto, campo) {
+  modalErroEl.textContent = texto;
+  modalErroEl.hidden = false;
+  campo.focus();
 }
 
 function abrirModalVendedor() {
   inputVendedor.value = vendedor;
+  inputVendedorId.value = vendedorId;
   modalErroEl.hidden = true;
   modalVendedorEl.hidden = false;
   document.body.classList.add('modal-aberto');
@@ -129,21 +144,26 @@ function fecharModalVendedor() {
 formVendedor.addEventListener('submit', (evento) => {
   evento.preventDefault();
   const nome = inputVendedor.value.trim();
+  const id = inputVendedorId.value.trim();
   if (nome.length < 2) {
-    modalErroEl.hidden = false;
-    inputVendedor.focus();
+    mostrarErroModal('Digite seu nome para continuar.', inputVendedor);
     return;
   }
-  salvarVendedor(nome);
-  definirVendedor(nome);
+  if (id && !/^\d{17,20}$/.test(id)) {
+    mostrarErroModal('ID do Discord inválido: deve ter de 17 a 20 números.', inputVendedorId);
+    return;
+  }
+  salvar(CHAVE_VENDEDOR, nome);
+  salvar(CHAVE_VENDEDOR_ID, id);
+  definirVendedor(nome, id);
   fecharModalVendedor();
 });
 
 trocarVendedorBtn.addEventListener('click', abrirModalVendedor);
 
-const vendedorSalvo = lerVendedorSalvo();
+const vendedorSalvo = lerSalvo(CHAVE_VENDEDOR);
 if (vendedorSalvo) {
-  definirVendedor(vendedorSalvo);
+  definirVendedor(vendedorSalvo, lerSalvo(CHAVE_VENDEDOR_ID));
 } else {
   abrirModalVendedor();
 }
@@ -197,6 +217,16 @@ function mostrarStatusRegistro(texto, tipo) {
   registroStatusEl.hidden = false;
 }
 
+function enviarWebhook(dados) {
+  return fetch(WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(dados),
+  }).then((resposta) => {
+    if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+  });
+}
+
 function montarRegistro(itens) {
   const selecionados = itens.filter((item) => (quantidades[item.id] || 0) > 0);
   const linhasItens = selecionados.map((item) => {
@@ -216,7 +246,7 @@ function montarRegistro(itens) {
     { name: 'Total', value: `**${formatarValor(totalAtual)}**` },
   );
 
-  return {
+  const registro = {
     username: 'Balaclav — Registro de Vendas',
     allowed_mentions: { parse: [] },
     embeds: [{
@@ -227,6 +257,14 @@ function montarRegistro(itens) {
       timestamp: new Date().toISOString(),
     }],
   };
+
+  // Marca o vendedor (em spoiler, para ficar discreto) só se ele informou o ID.
+  if (vendedorId) {
+    registro.content = `||<@${vendedorId}>||`;
+    registro.allowed_mentions = { parse: [], users: [vendedorId] };
+  }
+
+  return registro;
 }
 
 function atualizarLinha(item) {
@@ -351,13 +389,8 @@ function renderizarItens(itens) {
       ? `Com parceria — ${nomeParceriaInput.value.trim()}`
       : 'Sem parceria';
 
-    fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(montarRegistro(itens)),
-    })
-      .then((resposta) => {
-        if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+    enviarWebhook(montarRegistro(itens))
+      .then(() => {
         limparTudo();
         nomeParceriaInput.value = '';
         abrirModalSucesso(totalRegistrado, detalheVenda);
