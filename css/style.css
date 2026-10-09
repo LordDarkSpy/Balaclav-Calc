@@ -553,6 +553,44 @@ body.modal-aberto {
   font-size: 0.9rem;
 }
 
+.sucesso-icone {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--roxo-claro);
+  background: linear-gradient(135deg, var(--roxo-escuro), var(--roxo));
+  box-shadow: var(--brilho);
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.sucesso-rotulo {
+  margin: 0;
+  color: var(--texto-suave);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.sucesso-total {
+  margin: 4px 0 6px;
+  color: var(--roxo-claro);
+  font-size: 2.2rem;
+  font-weight: 700;
+  text-shadow: 0 0 14px rgba(197, 139, 255, 0.6);
+}
+
+.sucesso-detalhe {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
 .modal-erro {
   margin: 8px 0 0;
   color: #ffb3c6;

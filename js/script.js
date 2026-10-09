@@ -148,6 +148,44 @@ if (vendedorSalvo) {
   abrirModalVendedor();
 }
 
+const modalSucessoEl = document.getElementById('modal-sucesso');
+const sucessoTotalEl = document.getElementById('sucesso-total');
+const sucessoDetalheEl = document.getElementById('sucesso-detalhe');
+const sucessoCopiarBtn = document.getElementById('sucesso-copiar');
+const sucessoOkBtn = document.getElementById('sucesso-ok');
+let totalSucesso = 0;
+
+function abrirModalSucesso(total, detalhe) {
+  totalSucesso = total;
+  sucessoTotalEl.textContent = formatarValor(total);
+  sucessoDetalheEl.textContent = detalhe;
+  sucessoCopiarBtn.textContent = '📋 Copiar valor';
+  modalSucessoEl.hidden = false;
+  document.body.classList.add('modal-aberto');
+  sucessoOkBtn.focus();
+}
+
+function fecharModalSucesso() {
+  modalSucessoEl.hidden = true;
+  document.body.classList.remove('modal-aberto');
+}
+
+sucessoOkBtn.addEventListener('click', fecharModalSucesso);
+
+modalSucessoEl.addEventListener('click', (evento) => {
+  if (evento.target === modalSucessoEl) fecharModalSucesso();
+});
+
+document.addEventListener('keydown', (evento) => {
+  if (evento.key === 'Escape' && !modalSucessoEl.hidden) fecharModalSucesso();
+});
+
+sucessoCopiarBtn.addEventListener('click', () => {
+  copiarParaAreaDeTransferencia(String(Math.round(totalSucesso))).then(() => {
+    sucessoCopiarBtn.textContent = '✅ Copiado!';
+  });
+});
+
 function atualizarCampoParceria() {
   campoParceriaEl.hidden = !comParceria;
   nomeParceriaInput.classList.remove('invalido');
@@ -260,13 +298,15 @@ function renderizarItens(itens) {
     });
   });
 
-  limparBtn.addEventListener('click', () => {
+  function limparTudo() {
     itens.forEach((item) => {
       quantidades[item.id] = 0;
       atualizarLinha(item);
     });
     atualizarResumo(itens);
-  });
+  }
+
+  limparBtn.addEventListener('click', limparTudo);
 
   copiarBtn.addEventListener('click', () => {
     copiarParaAreaDeTransferencia(String(Math.round(totalAtual))).then(() => {
@@ -306,6 +346,10 @@ function renderizarItens(itens) {
     registrarBtn.disabled = true;
     registrarBtn.textContent = '⏳ Registrando...';
     registroStatusEl.hidden = true;
+    const totalRegistrado = totalAtual;
+    const detalheVenda = comParceria
+      ? `Com parceria — ${nomeParceriaInput.value.trim()}`
+      : 'Sem parceria';
 
     fetch(WEBHOOK_URL, {
       method: 'POST',
@@ -314,7 +358,9 @@ function renderizarItens(itens) {
     })
       .then((resposta) => {
         if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-        mostrarStatusRegistro('✅ Venda registrada no Discord!', 'sucesso');
+        limparTudo();
+        nomeParceriaInput.value = '';
+        abrirModalSucesso(totalRegistrado, detalheVenda);
       })
       .catch((erro) => {
         mostrarStatusRegistro(`Não foi possível registrar a venda (${erro.message}). Tente novamente.`, 'erro');

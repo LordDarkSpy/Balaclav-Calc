@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Venda — Balaclav</title>
 <link rel="icon" type="image/png" href="img/logo.png">
-<link rel="stylesheet" href="css/style.css?v=5">
+<link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
 
@@ -90,7 +90,20 @@
   </form>
 </div>
 
+<div id="modal-sucesso" class="modal-fundo" hidden>
+  <div class="modal cartao" role="dialog" aria-modal="true" aria-labelledby="sucesso-titulo">
+    <div class="sucesso-icone" aria-hidden="true">✓</div>
+    <h2 id="sucesso-titulo">Venda registrada!</h2>
+    <p class="modal-texto">O registro foi enviado para o Discord.</p>
+    <p class="sucesso-rotulo">Valor total cobrado</p>
+    <p id="sucesso-total" class="sucesso-total">R$ 0</p>
+    <p id="sucesso-detalhe" class="sucesso-detalhe"></p>
+    <button id="sucesso-copiar" type="button" class="botao-copiar">📋 Copiar valor</button>
+    <button id="sucesso-ok" type="button" class="botao-registrar">Nova venda</button>
+  </div>
+</div>
+
 <script src="js/config.js"></script>
-<script src="js/script.js?v=2"></script>
+<script src="js/script.js?v=3"></script>
 </body>
 </html>
