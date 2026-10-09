@@ -226,7 +226,18 @@ sucessoCopiarBtn.addEventListener('click', () => {
 const modalPedidoEl = document.getElementById('modal-pedido');
 const formPedido = document.getElementById('form-pedido');
 
+const pedidoContatoInput = document.getElementById('pedido-contato');
+const pedidoErroEl = document.getElementById('pedido-erro');
+
+// Máscara do contato: só números, no formato 000-000.
+pedidoContatoInput.addEventListener('input', () => {
+  const digitos = pedidoContatoInput.value.replace(/\D/g, '').slice(0, 6);
+  pedidoContatoInput.value = digitos.length > 3 ? `${digitos.slice(0, 3)}-${digitos.slice(3)}` : digitos;
+  pedidoErroEl.hidden = true;
+});
+
 function abrirModalPedido() {
+  pedidoErroEl.hidden = true;
   modalPedidoEl.hidden = false;
   document.body.classList.add('modal-aberto');
   document.getElementById('pedido-comprador').focus();
@@ -479,9 +490,15 @@ function renderizarItens(itens) {
 
   formPedido.addEventListener('submit', (evento) => {
     evento.preventDefault();
+    const contato = pedidoContatoInput.value.trim();
+    if (contato && !/^\d{3}-\d{3}$/.test(contato)) {
+      pedidoErroEl.hidden = false;
+      pedidoContatoInput.focus();
+      return;
+    }
     const dadosPedido = {
       comprador: document.getElementById('pedido-comprador').value.trim(),
-      contato: document.getElementById('pedido-contato').value.trim(),
+      contato,
       data: document.getElementById('pedido-data').value,
       hora: document.getElementById('pedido-hora').value,
     };

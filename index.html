@@ -103,7 +103,8 @@
     <label class="modal-rotulo" for="pedido-comprador">Nome do comprador</label>
     <input id="pedido-comprador" type="text" maxlength="60" autocomplete="off" placeholder="Ex.: João Silva">
     <label class="modal-rotulo" for="pedido-contato">Contato</label>
-    <input id="pedido-contato" type="text" maxlength="60" autocomplete="off" placeholder="Telefone, Discord...">
+    <input id="pedido-contato" type="text" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="000-000">
+    <p id="pedido-erro" class="modal-erro" hidden>O contato deve ter 6 números no formato 000-000.</p>
     <div class="pedido-data-hora">
       <div>
         <label class="modal-rotulo" for="pedido-data">Data</label>
@@ -133,6 +134,6 @@
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/script.js?v=7"></script>
+<script src="js/script.js?v=8"></script>
 </body>
 </html>
