@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Venda — Balaclav</title>
 <link rel="icon" type="image/png" href="img/logo.png">
-<link rel="stylesheet" href="css/style.css?v=8">
+<link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body>
 
@@ -95,6 +95,30 @@
   </form>
 </div>
 
+<div id="modal-pedido" class="modal-fundo" hidden>
+  <form id="form-pedido" class="modal cartao modal-pedido" role="dialog" aria-modal="true" aria-labelledby="pedido-titulo">
+    <div class="sucesso-icone" aria-hidden="true">🧾</div>
+    <h2 id="pedido-titulo">Dados do pedido</h2>
+    <p class="modal-texto">Todos os campos são opcionais.</p>
+    <label class="modal-rotulo" for="pedido-comprador">Nome do comprador</label>
+    <input id="pedido-comprador" type="text" maxlength="60" autocomplete="off" placeholder="Ex.: João Silva">
+    <label class="modal-rotulo" for="pedido-contato">Contato</label>
+    <input id="pedido-contato" type="text" maxlength="60" autocomplete="off" placeholder="Telefone, Discord...">
+    <div class="pedido-data-hora">
+      <div>
+        <label class="modal-rotulo" for="pedido-data">Data</label>
+        <input id="pedido-data" type="date">
+      </div>
+      <div>
+        <label class="modal-rotulo" for="pedido-hora">Hora</label>
+        <input id="pedido-hora" type="time">
+      </div>
+    </div>
+    <button type="submit" class="botao-pedido">🧾 Enviar pedido</button>
+    <button id="pedido-cancelar" type="button" class="botao-limpar">Cancelar</button>
+  </form>
+</div>
+
 <div id="modal-sucesso" class="modal-fundo" hidden>
   <div class="modal cartao" role="dialog" aria-modal="true" aria-labelledby="sucesso-titulo">
     <div class="sucesso-icone" aria-hidden="true">✓</div>
@@ -109,6 +133,6 @@
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/script.js?v=5"></script>
+<script src="js/script.js?v=6"></script>
 </body>
 </html>

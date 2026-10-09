@@ -223,6 +223,30 @@ sucessoCopiarBtn.addEventListener('click', () => {
   });
 });
 
+const modalPedidoEl = document.getElementById('modal-pedido');
+const formPedido = document.getElementById('form-pedido');
+
+function abrirModalPedido() {
+  modalPedidoEl.hidden = false;
+  document.body.classList.add('modal-aberto');
+  document.getElementById('pedido-comprador').focus();
+}
+
+function fecharModalPedido() {
+  modalPedidoEl.hidden = true;
+  document.body.classList.remove('modal-aberto');
+}
+
+document.getElementById('pedido-cancelar').addEventListener('click', fecharModalPedido);
+
+modalPedidoEl.addEventListener('click', (evento) => {
+  if (evento.target === modalPedidoEl) fecharModalPedido();
+});
+
+document.addEventListener('keydown', (evento) => {
+  if (evento.key === 'Escape' && !modalPedidoEl.hidden) fecharModalPedido();
+});
+
 function atualizarCampoParceria() {
   campoParceriaEl.hidden = !comParceria;
   nomeParceriaInput.classList.remove('invalido');
@@ -249,7 +273,18 @@ const TIPOS_REGISTRO = {
   pedido: { titulo: '🧾 Novo Pedido', cor: 0xf0b232, usuario: 'Balaclav — Pedidos' },
 };
 
-function montarRegistro(itens, tipo) {
+function camposDoPedido(dados) {
+  const campos = [];
+  if (dados.comprador) campos.push({ name: 'Comprador', value: dados.comprador, inline: true });
+  if (dados.contato) campos.push({ name: 'Contato', value: dados.contato, inline: true });
+  if (dados.data || dados.hora) {
+    const data = dados.data ? dados.data.split('-').reverse().join('/') : '';
+    campos.push({ name: 'Data e hora', value: [data, dados.hora].filter(Boolean).join(' às '), inline: true });
+  }
+  return campos;
+}
+
+function montarRegistro(itens, tipo, dadosPedido) {
   const config = TIPOS_REGISTRO[tipo];
   const selecionados = itens.filter((item) => (quantidades[item.id] || 0) > 0);
   const linhasItens = selecionados.map((item) => {
@@ -264,13 +299,13 @@ function montarRegistro(itens, tipo) {
   if (comParceria) {
     campos.push({ name: 'Parceria', value: nomeParceriaInput.value.trim(), inline: true });
   }
+  if (dadosPedido) {
+    campos.push(...camposDoPedido(dadosPedido));
+  }
   campos.push(
     { name: 'Itens', value: linhasItens.join('\n') },
     { name: 'Total', value: `**${formatarValor(totalAtual)}**` },
   );
-  if (tipo === 'pedido') {
-    campos.push({ name: 'Status', value: '⏳ Aguardando venda' });
-  }
 
   const registro = {
     username: config.usuario,
@@ -409,7 +444,7 @@ function renderizarItens(itens) {
   }
 
   // tipo 'venda': registra e limpa tudo. tipo 'pedido': registra e mantém os itens para a venda depois.
-  function registrar(tipo, botao, url) {
+  function registrar(tipo, botao, url, dadosPedido) {
     if (!podeRegistrar(url)) return;
 
     const textoBotao = botao.textContent;
@@ -422,11 +457,13 @@ function renderizarItens(itens) {
       ? `Com parceria — ${nomeParceriaInput.value.trim()}`
       : 'Sem parceria';
 
-    enviarWebhook(url, montarRegistro(itens, tipo))
+    enviarWebhook(url, montarRegistro(itens, tipo, dadosPedido))
       .then(() => {
         if (tipo === 'venda') {
           limparTudo();
           nomeParceriaInput.value = '';
+        } else {
+          formPedido.reset();
         }
         abrirModalSucesso(tipo, totalRegistrado, detalhe);
       })
@@ -440,7 +477,21 @@ function renderizarItens(itens) {
       });
   }
 
-  registrarPedidoBtn.addEventListener('click', () => registrar('pedido', registrarPedidoBtn, PEDIDO_WEBHOOK_URL));
+  registrarPedidoBtn.addEventListener('click', () => {
+    if (podeRegistrar(PEDIDO_WEBHOOK_URL)) abrirModalPedido();
+  });
+
+  formPedido.addEventListener('submit', (evento) => {
+    evento.preventDefault();
+    const dadosPedido = {
+      comprador: document.getElementById('pedido-comprador').value.trim(),
+      contato: document.getElementById('pedido-contato').value.trim(),
+      data: document.getElementById('pedido-data').value,
+      hora: document.getElementById('pedido-hora').value,
+    };
+    fecharModalPedido();
+    registrar('pedido', registrarPedidoBtn, PEDIDO_WEBHOOK_URL, dadosPedido);
+  });
   registrarBtn.addEventListener('click', () => registrar('venda', registrarBtn, WEBHOOK_URL));
 
   comParceria = document.querySelector('input[name="parceria"]:checked').value === 'com';

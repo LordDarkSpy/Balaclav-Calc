@@ -519,6 +519,21 @@ body {
   box-shadow: var(--sombra), 0 0 40px rgba(240, 178, 50, 0.3);
 }
 
+.modal input {
+  font-family: inherit;
+}
+
+.pedido-data-hora {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+}
+
+.modal-pedido input:focus {
+  border-color: #ffd27a;
+  box-shadow: 0 0 14px rgba(240, 178, 50, 0.3);
+}
+
 .modal-pedido .sucesso-icone {
   border-color: #ffd27a;
   background: linear-gradient(135deg, #a8741a, #f0b232);
