@@ -18,6 +18,8 @@ const modalErroEl = document.getElementById('modal-erro');
 
 // A URL do webhook vem de js/config.js.
 const WEBHOOK_URL = (window.BALACLAV_CONFIG && window.BALACLAV_CONFIG.webhookUrl) || '';
+const PEDIDO_WEBHOOK_URL = (window.BALACLAV_CONFIG && window.BALACLAV_CONFIG.pedidoWebhookUrl) || '';
+const registrarPedidoBtn = document.getElementById('registrar-pedido');
 const CHAVE_VENDEDOR = 'balaclav-vendedor';
 const CHAVE_VENDEDOR_ID = 'balaclav-vendedor-id';
 const inputVendedorId = document.getElementById('input-vendedor-id');
@@ -175,7 +177,22 @@ const sucessoCopiarBtn = document.getElementById('sucesso-copiar');
 const sucessoOkBtn = document.getElementById('sucesso-ok');
 let totalSucesso = 0;
 
-function abrirModalSucesso(total, detalhe) {
+const sucessoTituloEl = document.getElementById('sucesso-titulo');
+const sucessoTextoEl = document.getElementById('sucesso-texto');
+
+const TEXTOS_SUCESSO = {
+  venda: { titulo: 'Venda registrada!', texto: 'O registro foi enviado para o Discord.', rotulo: 'Valor total cobrado', botao: 'Nova venda' },
+  pedido: { titulo: 'Pedido registrado!', texto: 'O pedido foi enviado para o Discord. Os itens continuam na calculadora para a venda.', rotulo: 'Valor total do pedido', botao: 'OK' },
+};
+const sucessoRotuloEl = document.getElementById('sucesso-rotulo');
+
+function abrirModalSucesso(tipo, total, detalhe) {
+  const textos = TEXTOS_SUCESSO[tipo];
+  sucessoTituloEl.textContent = textos.titulo;
+  sucessoTextoEl.textContent = textos.texto;
+  sucessoRotuloEl.textContent = textos.rotulo;
+  sucessoOkBtn.textContent = textos.botao;
+  modalSucessoEl.querySelector('.modal').classList.toggle('modal-pedido', tipo === 'pedido');
   totalSucesso = total;
   sucessoTotalEl.textContent = formatarValor(total);
   sucessoDetalheEl.textContent = detalhe;
@@ -217,8 +234,8 @@ function mostrarStatusRegistro(texto, tipo) {
   registroStatusEl.hidden = false;
 }
 
-function enviarWebhook(dados) {
-  return fetch(WEBHOOK_URL, {
+function enviarWebhook(url, dados) {
+  return fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(dados),
@@ -227,7 +244,13 @@ function enviarWebhook(dados) {
   });
 }
 
-function montarRegistro(itens) {
+const TIPOS_REGISTRO = {
+  venda: { titulo: '📝 Registro de Venda', cor: 0x9d3cff, usuario: 'Balaclav — Registro de Vendas' },
+  pedido: { titulo: '🧾 Novo Pedido', cor: 0xf0b232, usuario: 'Balaclav — Pedidos' },
+};
+
+function montarRegistro(itens, tipo) {
+  const config = TIPOS_REGISTRO[tipo];
   const selecionados = itens.filter((item) => (quantidades[item.id] || 0) > 0);
   const linhasItens = selecionados.map((item) => {
     const qtd = quantidades[item.id];
@@ -245,13 +268,16 @@ function montarRegistro(itens) {
     { name: 'Itens', value: linhasItens.join('\n') },
     { name: 'Total', value: `**${formatarValor(totalAtual)}**` },
   );
+  if (tipo === 'pedido') {
+    campos.push({ name: 'Status', value: '⏳ Aguardando venda' });
+  }
 
   const registro = {
-    username: 'Balaclav — Registro de Vendas',
+    username: config.usuario,
     allowed_mentions: { parse: [] },
     embeds: [{
-      title: '📝 Registro de Venda',
-      color: 0x9d3cff,
+      title: config.titulo,
+      color: config.cor,
       fields: campos,
       footer: { text: 'Calculadora de Venda Balaclav' },
       timestamp: new Date().toISOString(),
@@ -360,49 +386,62 @@ function renderizarItens(itens) {
 
   nomeParceriaInput.addEventListener('input', () => nomeParceriaInput.classList.remove('invalido'));
 
-  registrarBtn.addEventListener('click', () => {
+  function podeRegistrar(url) {
     if (!vendedor) {
       abrirModalVendedor();
-      return;
+      return false;
     }
     if (totalAtual <= 0) {
       mostrarStatusRegistro('Adicione pelo menos um item antes de registrar.', 'erro');
-      return;
+      return false;
     }
     if (comParceria && !nomeParceriaInput.value.trim()) {
       nomeParceriaInput.classList.add('invalido');
       nomeParceriaInput.focus();
       mostrarStatusRegistro('Informe o nome da parceria.', 'erro');
-      return;
+      return false;
     }
-
-    if (!WEBHOOK_URL) {
+    if (!url) {
       mostrarStatusRegistro('Webhook não configurado (js/config.js).', 'erro');
-      return;
+      return false;
     }
+    return true;
+  }
 
+  // tipo 'venda': registra e limpa tudo. tipo 'pedido': registra e mantém os itens para a venda depois.
+  function registrar(tipo, botao, url) {
+    if (!podeRegistrar(url)) return;
+
+    const textoBotao = botao.textContent;
     registrarBtn.disabled = true;
-    registrarBtn.textContent = '⏳ Registrando...';
+    registrarPedidoBtn.disabled = true;
+    botao.textContent = '⏳ Registrando...';
     registroStatusEl.hidden = true;
     const totalRegistrado = totalAtual;
-    const detalheVenda = comParceria
+    const detalhe = comParceria
       ? `Com parceria — ${nomeParceriaInput.value.trim()}`
       : 'Sem parceria';
 
-    enviarWebhook(montarRegistro(itens))
+    enviarWebhook(url, montarRegistro(itens, tipo))
       .then(() => {
-        limparTudo();
-        nomeParceriaInput.value = '';
-        abrirModalSucesso(totalRegistrado, detalheVenda);
+        if (tipo === 'venda') {
+          limparTudo();
+          nomeParceriaInput.value = '';
+        }
+        abrirModalSucesso(tipo, totalRegistrado, detalhe);
       })
       .catch((erro) => {
-        mostrarStatusRegistro(`Não foi possível registrar a venda (${erro.message}). Tente novamente.`, 'erro');
+        mostrarStatusRegistro(`Não foi possível registrar ${tipo === 'venda' ? 'a venda' : 'o pedido'} (${erro.message}). Tente novamente.`, 'erro');
       })
       .finally(() => {
         registrarBtn.disabled = false;
-        registrarBtn.textContent = '📝 Registrar venda';
+        registrarPedidoBtn.disabled = false;
+        botao.textContent = textoBotao;
       });
-  });
+  }
+
+  registrarPedidoBtn.addEventListener('click', () => registrar('pedido', registrarPedidoBtn, PEDIDO_WEBHOOK_URL));
+  registrarBtn.addEventListener('click', () => registrar('venda', registrarBtn, WEBHOOK_URL));
 
   comParceria = document.querySelector('input[name="parceria"]:checked').value === 'com';
   atualizarCampoParceria();

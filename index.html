@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Calculadora de Venda — Balaclav</title>
 <link rel="icon" type="image/png" href="img/logo.png">
-<link rel="stylesheet" href="css/style.css?v=7">
+<link rel="stylesheet" href="css/style.css?v=8">
 </head>
 <body>
 
@@ -57,6 +57,7 @@
       <strong id="total-valor">R$ 0</strong>
     </div>
     <button id="copiar" type="button" class="botao-copiar">📋 Copiar valor total</button>
+    <button id="registrar-pedido" type="button" class="botao-pedido">🧾 Registrar pedido</button>
     <button id="registrar" type="button" class="botao-registrar">📝 Registrar venda</button>
     <p id="registro-status" class="registro-status" role="status" hidden></p>
     <button id="limpar" type="button" class="botao-limpar">Limpar tudo</button>
@@ -98,8 +99,8 @@
   <div class="modal cartao" role="dialog" aria-modal="true" aria-labelledby="sucesso-titulo">
     <div class="sucesso-icone" aria-hidden="true">✓</div>
     <h2 id="sucesso-titulo">Venda registrada!</h2>
-    <p class="modal-texto">O registro foi enviado para o Discord.</p>
-    <p class="sucesso-rotulo">Valor total cobrado</p>
+    <p id="sucesso-texto" class="modal-texto">O registro foi enviado para o Discord.</p>
+    <p id="sucesso-rotulo" class="sucesso-rotulo">Valor total cobrado</p>
     <p id="sucesso-total" class="sucesso-total">R$ 0</p>
     <p id="sucesso-detalhe" class="sucesso-detalhe"></p>
     <button id="sucesso-copiar" type="button" class="botao-copiar">📋 Copiar valor</button>
@@ -108,6 +109,6 @@
 </div>
 
 <script src="js/config.js"></script>
-<script src="js/script.js?v=4"></script>
+<script src="js/script.js?v=5"></script>
 </body>
 </html>

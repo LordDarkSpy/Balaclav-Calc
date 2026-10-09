@@ -490,6 +490,45 @@ body {
   cursor: wait;
 }
 
+.botao-pedido {
+  margin-top: 12px;
+  width: 100%;
+  padding: 11px;
+  border: 1px solid #f0b232;
+  border-radius: 8px;
+  background: rgba(240, 178, 50, 0.1);
+  color: #ffd27a;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
+}
+
+.botao-pedido:hover {
+  background: rgba(240, 178, 50, 0.2);
+  box-shadow: 0 0 14px rgba(240, 178, 50, 0.3);
+}
+
+.botao-pedido:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.modal.modal-pedido {
+  border-color: #f0b232;
+  box-shadow: var(--sombra), 0 0 40px rgba(240, 178, 50, 0.3);
+}
+
+.modal-pedido .sucesso-icone {
+  border-color: #ffd27a;
+  background: linear-gradient(135deg, #a8741a, #f0b232);
+}
+
+.modal-pedido .sucesso-total {
+  color: #ffd27a;
+  text-shadow: 0 0 14px rgba(240, 178, 50, 0.5);
+}
+
 .registro-status {
   margin: 10px 0 0;
   padding: 8px 10px;
